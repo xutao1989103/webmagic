@@ -1,6 +1,8 @@
 package us.codecraft.webmagic.util;
 
+import com.google.common.base.Strings;
 import org.apache.http.*;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -18,6 +20,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -29,6 +34,9 @@ public class HttpClientUtil {
     private  static final String ENCODING_GZIP = "gzip";
     private HttpClient httpclient;
 
+    public HttpClient getHttpclient() {
+        return httpclient;
+    }
 
     public HttpClientUtil(){
         setHttpclient(new DefaultHttpClient());
@@ -369,6 +377,74 @@ public class HttpClientUtil {
         }finally{
             httpGet.releaseConnection();
             long interval = System.currentTimeMillis() - start;
+        }
+    }
+
+    public File getFile(String url, Map headers ,String filePath, String mimeType)
+            throws Exception {
+
+        File imageFile = new File(filePath);
+        if (!(imageFile.exists() || imageFile.isFile())) {
+            try {
+                imageFile.createNewFile();
+            } catch (IOException e) {
+                throw new Exception("文件" + filePath + "无法创建.", e);
+            }
+        }
+
+        HttpGet httpGet = new HttpGet(url);
+        setHeader(httpGet,headers);
+        HttpResponse response = null;
+        try {
+            response = httpclient.execute(httpGet);
+        } catch (ClientProtocolException e1) {
+            throw new Exception(e1);
+        } catch (IOException e1) {
+            throw new Exception(e1);
+        }
+        boolean success = false;
+        // 请求成功
+        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
+            // 取得请求内容
+            HttpEntity entity = response.getEntity();
+            // 显示内容
+            if (entity != null) {
+                // 可以判断是否是文件数据流
+                String mimetype1 = EntityUtils.getContentMimeType(entity);
+                if (!Strings.isNullOrEmpty(mimetype1)
+                        && mimetype1.contains(mimeType)) {
+                    FileOutputStream output = null;
+
+                    try {
+                        output = new FileOutputStream(imageFile);
+                        entity.writeTo(output);
+                        output.flush();
+                        success = true;
+                    } catch (IOException e) {
+                        throw new Exception("I/O错误.", e);
+                    } finally {
+                        if (output != null) {
+                            try {
+                                output.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (success) {
+            return imageFile;
+        }
+        return null;
+    }
+
+    private void setHeader(HttpGet httpGet, Map headers){
+        Iterator it = headers.entrySet().iterator();
+        while (it.hasNext()){
+            Map.Entry entry = (Map.Entry) it.next();
+            httpGet.setHeader(entry.getKey().toString(),entry.getValue().toString());
         }
     }
 

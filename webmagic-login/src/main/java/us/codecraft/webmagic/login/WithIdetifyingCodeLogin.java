@@ -2,12 +2,14 @@ package us.codecraft.webmagic.login;
 
 import us.codecraft.webmagic.entity.Site;
 
+import java.io.*;
 import java.util.Map;
 
 /**
  * Created by 431 on 2015/6/21.
  */
 public class WithIdetifyingCodeLogin extends AbstractLogin {
+
     @Override
     public void prepare() {
         check();
@@ -32,5 +34,26 @@ public class WithIdetifyingCodeLogin extends AbstractLogin {
 
     private void validate(){
 
+    }
+
+    public byte[] getBytes(File file){
+        byte[] buffer = null;
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
+            byte[] b = new byte[1000];
+            int n;
+            while ((n = fis.read(b)) != -1) {
+                bos.write(b, 0, n);
+            }
+            fis.close();
+            bos.close();
+            buffer = bos.toByteArray();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return buffer;
     }
 }

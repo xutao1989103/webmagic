@@ -10,6 +10,7 @@ public class Site {
     private String mainUrl;
     private String password;
     private String username;
+    private String code;
     private String loginUrl;
     private List urls;
     private Map data;
@@ -78,5 +79,13 @@ public class Site {
 
     public void setParams(List params) {
         this.params = params;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

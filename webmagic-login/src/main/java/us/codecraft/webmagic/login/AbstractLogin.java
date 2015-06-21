@@ -1,6 +1,5 @@
 package us.codecraft.webmagic.login;
 
-import org.apache.http.impl.client.DefaultHttpClient;
 import us.codecraft.webmagic.ILogin;
 import us.codecraft.webmagic.entity.Site;
 import us.codecraft.webmagic.util.HttpClientUtil;
