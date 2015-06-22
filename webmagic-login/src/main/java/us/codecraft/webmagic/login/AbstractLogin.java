@@ -42,6 +42,5 @@ public abstract class AbstractLogin implements ILogin{
     static void printf(Object obj){
         System.out.println("-------------------------------------------------------------------------------------");
         System.out.println(obj);
-        System.out.println("-------------------------------------------------------------------------------------");
     }
 }

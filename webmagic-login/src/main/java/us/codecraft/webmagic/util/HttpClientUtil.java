@@ -1,6 +1,7 @@
 package us.codecraft.webmagic.util;
 
 import com.google.common.base.Strings;
+import com.google.common.primitives.Bytes;
 import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -20,9 +21,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -380,7 +379,50 @@ public class HttpClientUtil {
         }
     }
 
-    public File getFile(String url, Map headers ,String filePath, String mimeType)
+    public byte[] getFile(String url, Map headers , String mimeType)
+            throws Exception {
+        HttpGet httpGet = new HttpGet(url);
+        setHeader(httpGet,headers);
+        HttpResponse response = null;
+        try {
+            response = httpclient.execute(httpGet);
+        } catch (ClientProtocolException e1) {
+            throw new Exception(e1);
+        }
+        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                String mimetype1 = EntityUtils.getContentMimeType(entity);
+                if (!Strings.isNullOrEmpty(mimetype1)
+                        && mimetype1.contains(mimeType)) {
+                    return getBytes(entity);
+                }
+            }
+        }
+        return null;
+    }
+
+    private byte[] getBytes(HttpEntity entity){
+        if (entity == null) return null;
+        byte[] buffer = null;
+        byte[] b = new byte[1000];
+        int n;
+        try {
+            InputStream in = entity.getContent();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
+            while ((n = in.read(b)) != -1){
+                bos.write(b, 0, n);
+            }
+            in.close();
+            bos.close();
+            buffer = bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return buffer;
+    }
+
+    public File saveFile(String url, Map headers ,String filePath, String mimeType)
             throws Exception {
 
         File imageFile = new File(filePath);
