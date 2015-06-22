@@ -10,7 +10,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import us.codecraft.webmagic.entity.Site;
-import us.codecraft.webmagic.util.HttpClientUtil;
 
 import java.util.ArrayList;
 import java.util.List;
