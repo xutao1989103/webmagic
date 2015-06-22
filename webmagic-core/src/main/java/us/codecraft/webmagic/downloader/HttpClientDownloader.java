@@ -7,6 +7,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.annotation.ThreadSafe;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -24,6 +25,8 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Task;
+import us.codecraft.webmagic.login.LoginParams;
+import us.codecraft.webmagic.login.ZhiHuLogin;
 import us.codecraft.webmagic.selector.PlainText;
 import us.codecraft.webmagic.utils.HttpConstant;
 import us.codecraft.webmagic.utils.UrlUtils;
@@ -49,6 +52,22 @@ public class HttpClientDownloader extends AbstractDownloader {
     private final Map<String, CloseableHttpClient> httpClients = new HashMap<String, CloseableHttpClient>();
 
     private HttpClientGenerator httpClientGenerator = new HttpClientGenerator();
+
+    public HttpClientDownloader(boolean needLogin, LoginParams params){
+        super();
+        if(!needLogin) return;
+        doLogin(params);
+    }
+
+    public HttpClientDownloader(){
+
+    }
+
+    private void doLogin(LoginParams params){
+        HttpClient httpClient =  getHttpClient(Site.me().setDomain("www.zhihu.com"));
+        ZhiHuLogin zhiHuLogin = new ZhiHuLogin(httpClient,params);
+        zhiHuLogin.login();
+    }
 
     private CloseableHttpClient getHttpClient(Site site) {
         if (site == null) {

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
+import us.codecraft.webmagic.login.LoginParams;
 import us.codecraft.webmagic.pipeline.CollectorPipeline;
 import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.pipeline.Pipeline;
@@ -97,6 +98,10 @@ public class Spider implements Runnable, Task {
 
     protected boolean destroyWhenExit = true;
 
+    protected boolean needLogin = false;
+
+    protected LoginParams loginParams;
+
     private ReentrantLock newUrlLock = new ReentrantLock();
 
     private Condition newUrlCondition = newUrlLock.newCondition();
@@ -154,6 +159,19 @@ public class Spider implements Runnable, Task {
     public Spider startRequest(List<Request> startRequests) {
         checkIfRunning();
         this.startRequests = startRequests;
+        return this;
+    }
+
+    /**
+     * Set loginParams of Spider.<br>
+     * Prior to startUrls of Site.
+     *
+     * @param loginParams
+     * @return this
+     */
+    public Spider setLoginParams(LoginParams loginParams){
+        this.needLogin = true;
+        this.loginParams = loginParams;
         return this;
     }
 
@@ -279,7 +297,7 @@ public class Spider implements Runnable, Task {
 
     protected void initComponent() {
         if (downloader == null) {
-            this.downloader = new HttpClientDownloader();
+            this.downloader = new HttpClientDownloader(needLogin,loginParams);
         }
         if (pipelines.isEmpty()) {
             pipelines.add(new ConsolePipeline());
